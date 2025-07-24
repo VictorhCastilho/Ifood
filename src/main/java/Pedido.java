@@ -17,6 +17,10 @@ public class Pedido {
 
     private PedidoEstado estado;
 
+    private boolean finalizado = false;
+
+    private List<Observer> observers = new ArrayList<>();
+
     public Pedido() {
         this.itens = new ArrayList<>();
         this.valorTotal = 0.0;
@@ -94,7 +98,20 @@ public class Pedido {
         this.valorTotal += valor;
     }
 
-    // Métodos do padrão State
+    // Métodos do facade
+    public boolean finalizar() {
+        return PedidoFacade.verificarPedidoParaFinalizacao(this);
+    }
+
+    public void setFinalizado(boolean status) {
+        this.finalizado = status;
+    }
+
+    public boolean isFinalizado() {
+        return this.finalizado;
+    }
+
+    // Métodos do State
 
     public boolean confirmar() {
         return estado.confirmar(this);
@@ -118,9 +135,27 @@ public class Pedido {
 
     public void setEstado(PedidoEstado estado) {
         this.estado = estado;
+        notificarObservers();
     }
 
     public String getEstadoAtual() {
         return estado.getEstado();
     }
+
+    // Implementação do padrão Observer
+    public void adicionarObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    public void removerObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    public void notificarObservers() {
+        for (Observer observer : observers) {
+            observer.atualizar(this);
+        }
+    }
 }
+
+
